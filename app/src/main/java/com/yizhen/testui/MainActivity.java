@@ -15,15 +15,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.yizhen.testui.recyclerView.TRecycleViewActivity;
+import com.yizhen.testui.sqlite.SQLiteActivity;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-
 /**
- * 学习使用recycleView
  * 2018-03-22
  *  【读取assets下的文件，并安装】
  *  问题1：android.os.FileUriExposedException: file:///storage/emulated/0/check.apk exposed beyond app through Intent.getData()
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button btn_cycle;
     private Button btn_open_apk;
+    private Button btn_sqlite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_cycle.setOnClickListener(this);
         btn_open_apk = (Button) findViewById(R.id.btn_open_apk);
         btn_open_apk.setOnClickListener(this);
+        btn_sqlite = (Button) findViewById(R.id.btn_sqlite);
+        btn_sqlite.setOnClickListener(this);
 
         /**
          * 动态获取权限，Android 6.0 新特性，一些保护权限，除了要在AndroidManifest中声明权限，还要使用如下代码动态获取
@@ -75,40 +79,69 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 break;
             }
+            case R.id.btn_sqlite:{
+                Intent intent = new Intent(this, SQLiteActivity.class);
+                startActivity(intent);
+                break;
+            }
             case R.id.btn_open_apk:{
-                //1. 先打开文件，
-                //2.打开成功，安装apk
-                AssetManager am = null;
-                InputStream in = null;
-                OutputStream out = null;
-                try {
-                    am = getAssets();
-                    in = am.open("check_37_20180305_test_211.apk");
-                    Log.e("zhen", "is=" + in);
-                    String outFileName = Environment.getExternalStorageDirectory().getAbsolutePath();//保存到外部存储,大部分设备是sd卡根目录
-                    String copyName = "check.apk";//copy后具体名称 System.currentTimeMillis() +
-                    File outFile = new File(outFileName, copyName);
-                    out = new FileOutputStream(outFile);
-                    copyFile(in, out);
-                    in.close();
-                    out.flush();
-                    out.close();
-                    //copy 完毕,直接安装
-                    File file = new File(outFileName, copyName);
-                    installApkFile(this, file.getAbsolutePath());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                boolean openApk = true;
+                if(openApk){
+                    getApkAndInstall();
                 }
                 break;
             }
         }
     }
 
+    /**
+     * 1.先打开文件，
+     * 2.打开成功，安装apk
+     */
+    private void getApkAndInstall() {
+        AssetManager am = null;
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            am = getAssets();
+            in = am.open("check_37_20180305_test_211.apk");
+            Log.e("zhen", "is=" + in);
+            String outFileName = Environment.getExternalStorageDirectory().getAbsolutePath();//保存到外部存储,大部分设备是sd卡根目录
+            String copyName = "check.apk"; //copy后具体名称 System.currentTimeMillis() +
+            File outFile = new File(outFileName, copyName);
+            out = new FileOutputStream(outFile);
+            copyFile(in, out);
+            in.close();
+            out.flush();
+            out.close();
+            //copy 完毕,直接安装
+            File file = new File(outFileName, copyName);
+            installApkFile(this, file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void installApkFile(Context context, String filePath) {
+
+        File file = this.getFilesDir();
+        file = Environment.getExternalStorageDirectory(); //  /storage/emulated/0
+        Log.e("zhen", "file="+file);  //   /data/user/0/com.yizhen.testui/files
+        String[] filestr = file.list();
+        Log.e("zhen", "filestr="+filestr.length);
+        File[] files = file.listFiles();
+        Log.e("zhen", "files="+files.length);
+        for(File f: files){
+            Log.e("zhen", "f="+f);
+        }
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
             Uri contentUri = FileProvider.getUriForFile(context, "com.yizhen.testui.fileprovider", new File(filePath));
+
+
             intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
             Log.e("zhen", "版本6.0以上");
         } else {

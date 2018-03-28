@@ -2,6 +2,8 @@
 <paths>
     <!--<external-path path="Android/data/com.yizhen.testui/" name="files_root" />-->
     <external-path path="." name="external_storage_root" />
+
+   <!--<files-path path="Android/data/com.yizhen.testui/" name="../assets"/>-->
 </paths>
 
 

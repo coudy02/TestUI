@@ -24,5 +24,13 @@
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="81dp" />
 
+    <Button
+        android:id="@+id/btn_sqlite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="About SQLite"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="81dp" />
+
 
 </LinearLayout>
